@@ -28,7 +28,7 @@ mysql 默认是 5.7 版本，如需使用其它版本，配置 `.env` 文件中 
 
 Docker LNMP 默认将同级目录映射到 php-fpm 容器的工作目录，在项目的同级目录下载 Docker LNMP：
 ```
-$ 
+$ git@github.com:wangxy121/xy-docker-lnmp.git
 ```
 
 进入 xy-docker-lnmp 目录，生成配置文件 `.env`
