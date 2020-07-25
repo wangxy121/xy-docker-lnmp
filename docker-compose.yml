@@ -1,0 +1,80 @@
+version: "3.0"
+
+services:
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites:/etc/nginx/conf.d
+      - ${WEB_ROOT_PATH}:/var/www:rw
+    depends_on:
+      - php-fpm
+      - mysql
+      - redis
+
+  php-fpm:
+    build:
+      context: ./php-fpm
+      args:
+        - PHP_VERSION=${PHP_VERSION}
+        - INSTALL_PCNTL=${PHP_INSTALL_PCNTL}
+        - INSTALL_OPCACHE=${PHP_INSTALL_OPCACHE}
+        - INSTALL_REDIS=${PHP_INSTALL_REDIS}
+        - INSTALL_REDIS_VERSION=${PHP_INSTALL_REDIS_VERSION}
+        - INSTALL_MONGODB=${PHP_INSTALL_MONGODB}
+        - INSTALL_MONGODB_VERSION=${PHP_INSTALL_MONGODB_VERSION}
+        - INSTALL_MEMCACHED=${PHP_INSTALL_MEMCACHED}
+        - INSTALL_MEMCACHED_VERSION=${PHP_INSTALL_MEMCACHED_VERSION}
+        - INSTALL_SWOOLE=${PHP_INSTALL_SWOOLE}
+        - INSTALL_SWOOLE_VERSION=${PHP_INSTALL_SWOOLE_VERSION}
+        - INSTALL_XUNSEARCH=${PHP_INSTALL_XUNSEARCH}
+        - INSTALL_COMPOSER=${PHP_INSTALL_COMPOSER}
+    ports:
+      - 9000:9000
+    volumes:
+      - ./php-fpm/conf-${PHP_VERSION}/php.ini:/usr/local/etc/php/php.ini:rw
+      - ./php-fpm/conf-${PHP_VERSION}/php-fpm.conf:/usr/local/etc/php-fpm.conf:rw
+      - ./php-fpm/conf-${PHP_VERSION}/php-fpm.d:/usr/local/etc/php-fpm.d:rw
+      - ${WEB_ROOT_PATH}:/var/www:rw
+
+  mysql:
+    build:
+      context: ./mysql
+      args:
+        - MYSQL_VERSION=${MYSQL_VERSION}
+    ports:
+      - ${MYSQL_PORT}:3306
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+
+  mongodb:
+    build:
+      context: ./mongodb
+      args:
+        - MONGO_VERSION=${MONGO_VERSION}
+    ports:
+      - ${MONGO_PORT}:27017
+    volumes:
+      - ./mongo/data:/data/db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+
+  redis:
+    build:
+      context: ./redis
+      args:
+        - REDIS_VERSION=${REDIS_VERSION}
+    ports:
+      - ${REDIS_PORT}:6379
+    volumes:
+      - ./redis/data:/data
+    restart: always
